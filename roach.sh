@@ -8,6 +8,8 @@ echo "2: Start Node [Secure [Join]]";
 echo "3: Create Base Certs [CA,root user,host]";
 echo "4: Stop Node [Secure]";
 echo "5: Install cockroachdb";
+echo "6: Create user cert";
+echo "7: SQL connect [SECURE]";
 read option;
 
 #start server
@@ -55,5 +57,26 @@ then
 wget -o- https://binaries.cockroachdb.com/cockroach-v1.0.2.linux-amd64.tgz
 tar xfz cockroach-v1.0.2.linux-amd64.tgz
 cp -i cockroach-v1.0.2.linux-amd64/cockroach /usr/local/bin
+#user key
 cockroach version
+elif [ $option == '6' ]
+then
+echo "Username -->";
+read username;
+echo "CA.key -->";
+read key
+echo "Certs dir -->";
+read certs
+
+cockroach cert create-client $username --certs-dir=$certs --ca-key=$key
+#sql conenct
+elif [ $option == '7' ]
+then
+echo "RHOST -->";
+read rhost
+echo "Certs Dir -->";
+read certs
+echo "User -->"
+read user;
+cockroach sql --certs-dir=$certs --host=$rhost --user=$user
 fi
