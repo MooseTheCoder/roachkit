@@ -1,82 +1,66 @@
 #!/bin/bash
 
-echo "Welcome to roachKit, the easy way to start and connect cockroachdb servers";
-echo "roachKit uses default ports";
+echo "Cockroach 'roachkit' by @MooseTheCoder on github and @apollo on the cockroach forums";
 echo "";
-echo "1: Start Node [Secure] [Standalone]";
-echo "2: Start Node [Secure [Join]]";
-echo "3: Create Base Certs [CA,root user,host]";
-echo "4: Stop Node [Secure]";
-echo "5: Install cockroachdb";
-echo "6: Create user cert";
-echo "7: SQL connect [SECURE]";
-read option;
+echo "::: Tools :::";
+echo "1: Install Cockroach-db";
+echo "2: Configure Certificates";
+echo "3: Start Secure Node";
+echo "4: Join Secure Node";
+echo "5: Stop Secure Node";
+echo "6: Create Secure User";
+read action;
 
-#start server
-if [ $option == '1' ]
-then
-echo "Certs dir -->";
-read crtdir;
-echo "Hostname -->";
-read hostname;
-cockroach start --host=$hostname --certs-dir=$crtdir &
-#join node
-elif [ $option == '2' ]
-then
-echo "Certs dir -->";
-read crtdir;
-echo "Local hostname -->";
-read lhost;
-echo "Remote hostnme -->";
-read rhost;
-cockroach start --host=$lhots --join=$rhost:26257 --certs-dir=$crtdir &
-#create certs
-elif [ $option == '3' ]
-then
-mkdir certs
-mkdir dir-safe
-echo "Creating base CA";
-cockroach cert create-ca --certs-dir=certs --ca-key=dir-safe/ca.key
-echo "Creating root user CA";
-cockroach cert create-client root --certs-dir=certs --ca-key=dir-safe/ca.key
-echo "Creating host CA";
-echo "Enter hostname -->";
-read lhost
-cockroach cert create-node $lhost --certs-dir=certs --ca-key=dir-safe/ca.key
-#exit server
-elif [ $option == '4' ]
-then
-echo "Certs dir -->";
-read crtdir;
-echo "Hostname -->";
-read hostname;
-cockroach quit --host=$hostname --certs-dir=$crtdir;
-#install
-elif [ $option == '5' ]
+#install cockroach
+if [ $action == "1" ]
 then
 wget -o- https://binaries.cockroachdb.com/cockroach-v1.0.2.linux-amd64.tgz
 tar xfz cockroach-v1.0.2.linux-amd64.tgz
 cp -i cockroach-v1.0.2.linux-amd64/cockroach /usr/local/bin
-#user key
 cockroach version
-elif [ $option == '6' ]
+#create certs
+
+elif [ $action == "2" ]
+then
+mkdir certs
+mkdir safe
+cockroack cert create-ca --certs-dir=certs --ca-key=safe/ca.key
+cockroach cert create-client root --certs-dir=certs --ca-key=safe/ca.key
+echo "Hostname -->";
+read hostname
+cockraoch cert create-node $hostname --certs-dir=certs --ca-key=safe/ca.key
+#start node
+
+elif [ $action == "3" ]
+then
+echo "Hostname -->";
+read hostname;
+cockroach start --certs-dir=certs --host=$hostname &
+#join secure node
+
+elif [ $action == "4" ]
+then
+echo "Local Hostname -->";
+read lhost;
+echo "Remote Hostname -->";
+read rhost;
+cockroach start --certs-dir=certs --host=$lhost --join=$rhost:26257 &
+#stop secure node
+
+elif [ $action == "5" ]
+then
+echo "Hostname -->";
+read rhost;
+
+cockroach quit --certs-dir=certs --host=$rhost
+
+#create secure user
+
+elif [ $action == "6" ]
 then
 echo "Username -->";
 read username;
-echo "CA.key -->";
-read key
-echo "Certs dir -->";
-read certs
-
-cockroach cert create-client $username --certs-dir=$certs --ca-key=$key
-#sql conenct
-elif [ $option == '7' ]
-then
-echo "RHOST -->";
-read rhost
-echo "Certs Dir -->";
-read certs
-echo "User -->"
-read user;
-cockroach sql --certs-dir=$certs --host=$rhost --user=$user
+echo "Hostname -->";
+read hostname
+cockroach user set $username --certs-dir=certs --host=$hostname --password
 fi
