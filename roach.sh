@@ -64,4 +64,5 @@ read username;
 echo "Hostname -->";
 read hostname
 cockroach user set $username --certs-dir=certs --host=$hostname --password
+cockroach certs create-client $username --certs-dir=certs --ca-key=safe/ca.key
 fi
