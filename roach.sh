@@ -24,11 +24,12 @@ elif [ $action == "2" ]
 then
 mkdir certs
 mkdir safe
-cockroack cert create-ca --certs-dir=certs --ca-key=safe/ca.key
+echo "Directorys created, genetrating certs";
+cockroach cert create-ca --certs-dir=certs --ca-key=safe/ca.key
 cockroach cert create-client root --certs-dir=certs --ca-key=safe/ca.key
 echo "Hostname -->";
 read hostname
-cockraoch cert create-node $hostname --certs-dir=certs --ca-key=safe/ca.key
+cockroach cert create-node $hostname --certs-dir=certs --ca-key=safe/ca.key
 #start node
 
 elif [ $action == "3" ]
